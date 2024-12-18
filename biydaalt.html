@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Хуучин хувцасны онлайн шоп</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4; 
+            color: #333;
+            line-height: 1.5;
+        }
+        header {
+            background: #222;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 1rem;
+            max-width: 1000px;
+            margin: auto;
+        }
+        .product {
+            background: #fff;
+            border-radius: 10px;
+            margin: 1rem;
+            padding: 1rem;
+            width: 220px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .product:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .product img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .product h3 {
+            font-size: 1.2rem;
+            margin: 0.5rem 0;
+        }
+        .product p {
+            font-size: 1rem;
+            color: #666;
+        }
+        .product button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .product button:hover {
+            background-color: #0056b3;
+        }
+        #cart {
+            margin: 2rem;
+            text-align: center;
+            background: #fff;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #cart ul {
+            list-style: none;
+            padding: 0;
+        }
+        #cart ul li {
+            background: #f9f9f9;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            border-radius: 5px;
+        }
+        #message {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            margin-top: 20px;
+            visibility: hidden;
+            padding: 1rem;
+            background: rgba(0, 0, 255, 0.7);
+            border-radius: 10px;
+        }
+        #search-bar {
+            text-align: center;
+            margin: 20px;
+        }
+        #search-bar input {
+            padding: 0.8rem;
+            font-size: 1rem;
+            width: 80%;
+            max-width: 350px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        #chat-section {
+            text-align: center;
+            margin-top: 30px;
+            padding: 1rem;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #chat-section textarea {
+            width: 80%;
+            height: 100px;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        Хуучин хувцасны онлайн шоп
+    </header>
+
+    <!-- Хайлт хэсэг -->
+    <div id="search-bar">
+        <input type="text" id="search-input" placeholder="Хайлтаар хайх..." onkeyup="searchProducts()">
+    </div>
+
+    <!-- Бүтээгдэхүүнүүд -->
+    <div class="container" id="products"></div>
+
+    <div id="cart">
+        <h2>Миний сагс</h2>
+        <ul id="cart-items">
+            <li>Сагс хоосон байна.</li>
+        </ul>
+    </div>
+
+    <div id="message"></div>
+
+    <script>
+        const products = [
+            { id: 1, name: "Цамц", price: 15000, description: "Өвлийн цамц", images: ["tsamts.png"], season: "Өвөл" },
+            { id: 2, name: "Өмд", price: 20000, description: "Өмд", images: ["omd.png"], season: "Хавар" },
+            { id: 3, name: "Гутал", price: 30000, description: "Том размертай гутал", images: ["gutal.png"], season: "Зун" },
+            { id: 4, name: "Хантааз", price: 25000, description: "Өвлийн хантааз", images: ["hantaaz.png"], season: "Өвөл" },
+            { id: 5, name: "Пальто", price: 45000, description: "Сонгодог пальто", images: ["palto.png"], season: "Намар" },
+            { id: 6, name: "Малгай", price: 10000, description: "Дулаан малгай", images: ["malgai.png"], season: "Өвөл" }
+        ];
+
+        const cart = [];
+
+        function displayProducts(filtered = products) {
+            const productsContainer = document.getElementById("products");
+            productsContainer.innerHTML = "";
+
+            filtered.forEach(product => {
+                const productElement = document.createElement("div");
+                productElement.classList.add("product");
+                productElement.innerHTML = `
+                    <img src="${product.images[0]}" alt="${product.name}">
+                    <h3>${product.name}</h3>
+                    <p>${product.description}</p>
+                    <p>Үнэ: ${product.price}₮</p>
+                    <button onclick="addToCart(${product.id})">Сагсанд нэмэх</button>
+                `;
+                productsContainer.appendChild(productElement);
+            });
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            cart.push(product);
+            displayCart();
+            showMessage(`${product.name} сагсанд нэмэгдлээ!`);
+        }
+
+        function displayCart() {
+            const cartItemsContainer = document.getElementById("cart-items");
+
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = "<li>Сагс хоосон байна.</li>";
+                return;
+            }
+
+            cartItemsContainer.innerHTML = "";
+            cart.forEach((item, index) => {
+                const listItem = document.createElement("li");
+                listItem.innerHTML = `
+                    ${item.name} - ${item.price}₮ 
+                    <button onclick="removeFromCart(${index})" style="margin-left: 10px;">Устгах</button>
+                `;
+                cartItemsContainer.appendChild(listItem);
+            });
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            displayCart();
+            showMessage("Сагснаас бүтээгдэхүүн устгагдлаа!");
+        }
+
+        function showMessage(message) {
+            const messageDiv = document.getElementById("message");
+            messageDiv.textContent = message;
+            messageDiv.style.visibility = "visible";
+
+            setTimeout(() => {
+                messageDiv.style.visibility = "hidden";
+            }, 3000);
+        }
+
+        // Хайлтын функц
+        function searchProducts() {
+            const searchInput = document.getElementById("search-input").value.toLowerCase();
+            
+            const filteredProducts = products.filter(product => 
+                product.name.toLowerCase().includes(searchInput) || 
+                product.description.toLowerCase().includes(searchInput)
+            );
+
+            if (filteredProducts.length > 0) {
+                displayProducts(filteredProducts);
+            } else {
+                const productsContainer = document.getElementById("products");
+                productsContainer.innerHTML = "<p style='text-align: center;'>Хайлтад тохирох бүтээгдэхүүн олдсонгүй.</p>";
+            }
+        }
+
+        // Эхлүүлэх
+        displayProducts();
+    </script>
+</body>
+</html>
